@@ -8,10 +8,9 @@ import User from '../models/User';
  * update => Atualizar
  * delete => Deletar
  */
-class USerController {
+class UserController {
   async store(request, response) {
-
-    const {name, email, password_hash, admin} = request.body
+    const { name, email, password_hash, admin } = request.body;
 
     const user = await User.create({
       id: v4(),
@@ -30,4 +29,4 @@ class USerController {
   }
 }
 
-export default new USerController;
+export default new UserController();
