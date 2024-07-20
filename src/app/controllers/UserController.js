@@ -1,22 +1,38 @@
 import { v4 } from 'uuid';
 import User from '../models/User';
-
-/**
- * store => Cadastrar / Adicionar
- * index => listar vários
- * show => listar apenas um
- * update => Atualizar
- * delete => Deletar
- */
+import * as Yup from 'yup';
 class UserController {
   async store(request, response) {
-    const { name, email, password_hash, admin } = request.body;
+    const schema = Yup.object({
+      name: Yup.string().required(),
+      email: Yup.string().email().required(),
+      password: Yup.string().min(6).required(),
+      admin: Yup.boolean(),
+    });
+
+    try {
+      schema.validateSync(request.body, { abortEarly: false });
+    } catch (err) {
+      return response.status(400).json({ error: err.errors });
+    }
+
+    const { name, email, password, admin } = request.body;
+
+    const userExists = await User.findOne({
+      where: {
+        email,
+      },
+    });
+
+    if (userExists) {
+      return response.status(400).json({ error: 'User already exists' });
+    }
 
     const user = await User.create({
       id: v4(),
       name,
       email,
-      password_hash,
+      password,
       admin,
     });
 
@@ -30,3 +46,11 @@ class UserController {
 }
 
 export default new UserController();
+
+/**
+ * store => Cadastrar / Adicionar
+ * index => listar vários
+ * show => listar apenas um
+ * update => Atualizar
+ * delete => Deletar
+ */
